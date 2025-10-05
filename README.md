@@ -1,0 +1,1 @@
+# csad2025KI-408KonovalenkoVladyslav7
