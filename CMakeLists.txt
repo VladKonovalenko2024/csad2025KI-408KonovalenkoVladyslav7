@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Назва проєкту
+# Project name and supported languages
 project(hello_project LANGUAGES CXX)
 
-# Вказати стандарт C++
+# Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Додати виконуваний файл
+# Add executable target from main.cpp
 add_executable(hello main.cpp)
