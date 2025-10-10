@@ -1,0 +1,86 @@
+name: Cross Platform CI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - 'feature/**'
+  pull_request:
+    branches:
+      - develop
+      - master
+      - 'feature/**'
+  workflow_dispatch:
+
+jobs:
+  cross_build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false # Allow other OS to continue if one fails
+
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install CMake and build tools (Linux)
+      - name: Install CMake and build tools (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++
+
+      # Install CMake and build tools (macOS)
+      - name: Install CMake and build tools (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install cmake gcc || true # Ignore if already installed
+          brew link gcc
+          which g++
+
+      # Install CMake (Windows)
+      - name: Install CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        shell: pwsh
+
+      # Verify CI script existence
+      - name: Verify CI script
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ls -l ci.bat || { echo "ci.bat not found"; exit 1; }
+          else
+            ls -l ci.sh || { echo "ci.sh not found"; exit 1; }
+          fi
+        shell: bash
+
+      # Run CI script
+      - name: Run CI script
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ./ci.bat || exit 1
+          else
+            chmod +x ./ci.sh
+            ./ci.sh || exit 1
+          fi
+        shell: bash
+
+      # Upload artifacts
+      - name: Upload artifacts
+        if: always() # Upload even if build fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: executables-${{ matrix.os }}
+          path: |
+            build/hello
+            build/unit_tests
+            build/Release/hello.exe
+            build/Release/unit_tests.exe
+
+      # Deploy (placeholder)
+      - name: Deploy
+        run: echo "Deploy step (to be implemented)"
