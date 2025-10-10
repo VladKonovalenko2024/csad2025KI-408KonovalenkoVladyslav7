@@ -7,6 +7,9 @@ project(hello_project LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Force dynamic runtime library (/MD) for consistency
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
 # Add executable
 add_executable(hello main.cpp math_operations.cpp)
 
@@ -16,6 +19,8 @@ FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
 )
+# Force Google Test to use dynamic runtime
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Make googletest available
 FetchContent_MakeAvailable(googletest)
 enable_testing()
